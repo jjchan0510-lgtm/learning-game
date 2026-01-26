@@ -131,6 +131,8 @@ function disableAllButtons() {
 function pronounceWord(accent = 'us') {
     const word = selectedWord.toLowerCase();
     
+    console.log('Pronouncing word:', word, 'with accent:', accent);
+    
     // Use browser's text-to-speech directly - most reliable
     if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(word);
@@ -148,14 +150,22 @@ function pronounceWord(accent = 'us') {
         
         // Cancel any previous speech
         speechSynthesis.cancel();
+        
+        // Add event listeners for debugging
+        utterance.onstart = () => console.log('Speech started');
+        utterance.onend = () => console.log('Speech ended');
+        utterance.onerror = (event) => console.error('Speech error:', event);
+        
         speechSynthesis.speak(utterance);
+        console.log('Speaking triggered');
     } else {
+        console.error('Speech synthesis not supported');
         alert('Speech synthesis is not supported in your browser.');
     }
 }
 
 function showHint() {
-    const word = selectedWord.toLowerCase();
+    const word = selectedWord.toLowerCase().trim();
     const hintContent = document.getElementById('hintContent');
     
     // Built-in dictionary with all game words
@@ -198,13 +208,19 @@ function showHint() {
         'cookie': 'A small sweet baked treat'
     };
     
+    console.log('Selected word:', selectedWord);
+    console.log('Looking for:', word);
+    console.log('Available hints:', Object.keys(hints));
+    
     const hint = hints[word];
+    console.log('Found hint:', hint);
+    
     if (hint) {
         hintContent.innerHTML = `<div class="hint-box">
             <strong>Hint:</strong> ${hint}
         </div>`;
     } else {
-        hintContent.innerHTML = '<div class="hint-box">No hint available for this word.</div>';
+        hintContent.innerHTML = `<div class="hint-box">No hint available for "${word}". This word is not in the dictionary.</div>`;
     }
 }
 
