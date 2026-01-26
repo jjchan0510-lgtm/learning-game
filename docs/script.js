@@ -45,28 +45,37 @@ function createAlphabetButtons() {
 }
 
 function guessLetter(letter) {
-    if (gameOver || guessedLetters.includes(letter)) return;
+    if (gameOver) return;
+    
+    // Check if button is already disabled (already guessed at current position)
+    const buttonElement = document.querySelector(`.letter-btn:nth-child(${letter.charCodeAt(0) - 64})`);
+    if (buttonElement.disabled) return;
+    
     // Check if this is the correct next letter in the sequence
     const correctLetter = selectedWord[nextLetterIndex];
     
     if (letter === correctLetter) {
         // Correct guess - it's the next letter in sequence
         guessedLetters.push(letter);
-        document.querySelector(`.letter-btn:nth-child(${letter.charCodeAt(0) - 64})`).classList.add('correct');
+        buttonElement.classList.add('correct');
         nextLetterIndex++;
         updateWordDisplay();
         checkWin();
+        
+        // Re-enable button if the next letter is the same (for repeated letters)
+        if (nextLetterIndex < selectedWord.length && selectedWord[nextLetterIndex] === letter) {
+            buttonElement.disabled = false;
+        } else {
+            buttonElement.disabled = true;
+        }
     } else {
         // Wrong guess - either wrong letter or not the next letter
-        // Wrong guess
         wrongGuesses++;
-        document.querySelector(`.letter-btn:nth-child(${letter.charCodeAt(0) - 64})`).classList.add('incorrect');
+        buttonElement.classList.add('incorrect');
+        buttonElement.disabled = true;
         drawHangmanPart();
         checkLose();
     }
-    
-    // Disable the button
-    document.querySelector(`.letter-btn:nth-child(${letter.charCodeAt(0) - 64})`).disabled = true;
 }
 
 function updateWordDisplay() {
@@ -89,8 +98,7 @@ function updateGameStatus() {
             status.classList.add('win');
         }
     } else {
-        const nextLetter = selectedWord[nextLetterIndex];
-        status.textContent = `Next letter: "${nextLetter}" | Wrong guesses: ${wrongGuesses}/${maxWrongGuesses}`;
+        status.textContent = `Wrong guesses: ${wrongGuesses}/${maxWrongGuesses}`;
     }
 }
 
