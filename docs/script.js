@@ -145,18 +145,26 @@ function pronounceWord(accent = 'us') {
             
             // Find the audio for the selected accent
             if (accent === 'us') {
-                // Look for US audio (en-US)
-                const usAudio = phonetics.find(p => p.audio && p.text && p.text.includes('ˈ'));
-                audioUrl = usAudio ? usAudio.audio : (phonetics[0]?.audio || '');
+                // Look for US audio first
+                const usAudio = phonetics.find(p => p.text && p.text.includes('ˈ') && p.audio);
+                if (usAudio) {
+                    audioUrl = usAudio.audio;
+                } else {
+                    // Fallback to first available audio
+                    audioUrl = phonetics.find(p => p.audio)?.audio || '';
+                }
             } else if (accent === 'uk') {
-                // Look for UK audio (en-GB)
-                const ukAudio = phonetics.reverse().find(p => p.audio);
-                audioUrl = ukAudio ? ukAudio.audio : (phonetics[0]?.audio || '');
+                // Look for UK audio - usually the last one or marked differently
+                const allAudios = phonetics.filter(p => p.audio);
+                audioUrl = allAudios.length > 1 ? allAudios[allAudios.length - 1].audio : (allAudios[0]?.audio || '');
             }
             
             if (audioUrl) {
                 const audio = new Audio(audioUrl);
-                audio.play();
+                audio.play().catch(err => {
+                    console.error('Error playing audio:', err);
+                    alert('Could not play audio. Please try again!');
+                });
             } else {
                 alert(`Pronunciation not available for this word. Try another word!`);
             }
