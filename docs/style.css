@@ -61,19 +61,31 @@ body {
     margin-bottom: 10px;
 }
 
+.pronounce-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
 .pronounce-btn {
     background: #ff9800;
     color: white;
     border: none;
-    padding: 8px 16px;
+    padding: 10px 20px;
     font-size: 14px;
     border-radius: 6px;
     cursor: pointer;
     transition: background 0.3s ease;
+    font-weight: bold;
 }
 
 .pronounce-btn:hover {
     background: #e68900;
+}
+
+.pronounce-btn:active {
+    transform: scale(0.95);
 }
 
 .alphabet {

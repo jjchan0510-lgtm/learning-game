@@ -128,36 +128,43 @@ function disableAllButtons() {
     buttons.forEach(button => button.disabled = true);
 }
 
-function pronounceWord() {
-    if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(selectedWord);
-        
-        // Try to find a British English voice
-        const voices = speechSynthesis.getVoices();
-        const britishVoice = voices.find(voice => voice.lang === 'en-GB');
-        
-        if (britishVoice) {
-            utterance.voice = britishVoice;
-        } else {
-            // Fallback: set language to British English if voice not found
-            utterance.lang = 'en-GB';
-        }
-        
-        // Adjust speech rate and pitch for clearer pronunciation
-        utterance.rate = 0.8;
-        utterance.pitch = 1.0;
-        
-        speechSynthesis.speak(utterance);
-    } else {
-        alert('Speech synthesis is not supported in your browser.');
-    }
-}
-
-// Ensure voices are loaded before using them
-if ('speechSynthesis' in window) {
-    speechSynthesis.onvoiceschanged = function() {
-        // Voices are now available
-    };
+function pronounceWord(accent = 'us') {
+    const word = selectedWord.toLowerCase();
+    
+    // Fetch pronunciation from Free Dictionary API
+    fetch(`https://api.dictionaryapi.dev/api/v2/entries/english/${word}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Word not found');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const phonetics = data[0].phonetics;
+            let audioUrl = '';
+            
+            // Find the audio for the selected accent
+            if (accent === 'us') {
+                // Look for US audio (en-US)
+                const usAudio = phonetics.find(p => p.audio && p.text && p.text.includes('ˈ'));
+                audioUrl = usAudio ? usAudio.audio : (phonetics[0]?.audio || '');
+            } else if (accent === 'uk') {
+                // Look for UK audio (en-GB)
+                const ukAudio = phonetics.reverse().find(p => p.audio);
+                audioUrl = ukAudio ? ukAudio.audio : (phonetics[0]?.audio || '');
+            }
+            
+            if (audioUrl) {
+                const audio = new Audio(audioUrl);
+                audio.play();
+            } else {
+                alert(`Pronunciation not available for this word. Try another word!`);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching pronunciation:', error);
+            alert('Could not fetch pronunciation. Check internet connection or try another word!');
+        });
 }
 
 // Start the game when the page loads
