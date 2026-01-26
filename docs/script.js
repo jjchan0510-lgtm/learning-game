@@ -192,39 +192,84 @@ function showHint() {
     const word = selectedWord.toLowerCase();
     const hintContent = document.getElementById('hintContent');
     
-    // Fetch definition from API
-    fetch(`https://api.dictionaryapi.dev/api/v2/entries/english/${word}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Definition not found');
-            }
-            return response.json();
-        })
+    // Try multiple sources for definition
+    // First try: DuckDuckGo API (reliable and free)
+    fetch(`https://api.duckduckgo.com/?q=${word}&format=json`)
+        .then(response => response.json())
         .then(data => {
-            const entry = data[0];
             let hintHTML = '';
             
-            // Get the first meaning with part of speech
-            if (entry.meanings && entry.meanings.length > 0) {
-                const meaning = entry.meanings[0];
-                const partOfSpeech = meaning.partOfSpeech || 'Unknown';
-                const definition = meaning.definitions && meaning.definitions.length > 0 
-                    ? meaning.definitions[0].definition 
-                    : 'Definition not available';
-                
+            if (data.AbstractText) {
+                // DuckDuckGo has a definition
                 hintHTML = `<div class="hint-box">
-                    <strong>Part of Speech:</strong> ${partOfSpeech}<br>
-                    <strong>Meaning:</strong> ${definition}
+                    <strong>Definition:</strong> ${data.AbstractText}
                 </div>`;
+            } else if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+                // Try to extract definition from related topics
+                const firstTopic = data.RelatedTopics[0];
+                if (firstTopic.Text) {
+                    hintHTML = `<div class="hint-box">
+                        <strong>Definition:</strong> ${firstTopic.Text}
+                    </div>`;
+                } else {
+                    throw new Error('No definition found');
+                }
             } else {
-                hintHTML = '<div class="hint-box">Definition not available for this word.</div>';
+                throw new Error('No definition found');
             }
             
             hintContent.innerHTML = hintHTML;
         })
         .catch(error => {
             console.error('Error fetching definition:', error);
-            hintContent.innerHTML = '<div class="hint-box">Could not fetch hint. Try another word!</div>';
+            // Fallback: use a simple hint based on common words
+            const hints = {
+                'apple': 'A round fruit that is red, green, or yellow',
+                'banana': 'A yellow fruit with soft flesh',
+                'orange': 'A round citrus fruit with orange color',
+                'grape': 'A small round fruit that grows in bunches',
+                'lemon': 'A yellow citrus fruit with sour taste',
+                'peach': 'A fuzzy round fruit with sweet flesh',
+                'cherry': 'A small red or dark fruit with a pit',
+                'melon': 'A large round fruit with soft flesh',
+                'house': 'A building where people live',
+                'school': 'A place where students learn',
+                'computer': 'An electronic device for processing information',
+                'window': 'An opening in a wall that lets in light',
+                'doctor': 'A person who treats sick people',
+                'teacher': 'A person who teaches students',
+                'student': 'A person who studies and learns',
+                'elephant': 'A large animal with a long trunk',
+                'giraffe': 'A tall animal with a long neck',
+                'tiger': 'A large striped wild cat',
+                'lion': 'A large wild cat with a mane',
+                'zebra': 'A striped animal similar to a horse',
+                'monkey': 'A small primate with a tail',
+                'bear': 'A large furry wild animal',
+                'ocean': 'A large body of salty water',
+                'mountain': 'A very high landform',
+                'forest': 'A large area covered with trees',
+                'desert': 'A dry sandy area with little water',
+                'river': 'A large flowing body of water',
+                'lake': 'A body of water surrounded by land',
+                'beach': 'A sandy area by the sea',
+                'pizza': 'An Italian baked dish with cheese and toppings',
+                'burger': 'A sandwich with a meat patty',
+                'pasta': 'Italian noodles made from wheat',
+                'salad': 'A dish of raw vegetables',
+                'soup': 'A liquid dish with vegetables or meat',
+                'cake': 'A sweet baked dessert',
+                'cookie': 'A small sweet baked treat'
+            };
+            
+            const hint = hints[word];
+            if (hint) {
+                hintContent.innerHTML = `<div class="hint-box">
+                    <strong>Definition:</strong> ${hint}
+                </div>`;
+            } else {
+                hintContent.innerHTML = '<div class="hint-box">Definition not available. Try another word!</div>';
+            }
         });
 }
 
