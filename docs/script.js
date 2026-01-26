@@ -3,7 +3,7 @@ const wordList = [
     'HOUSE', 'SCHOOL', 'COMPUTER', 'WINDOW', 'DOCTOR', 'TEACHER', 'STUDENT',
     'ELEPHANT', 'GIRAFFE', 'TIGER', 'LION', 'ZEBRA', 'MONKEY', 'BEAR',
     'OCEAN', 'MOUNTAIN', 'FOREST', 'DESERT', 'RIVER', 'LAKE', 'BEACH',
-    'PIZZA', 'BURGER', 'PASTA', 'SALAD', 'SOUP', 'CAKE', 'COOKIE'
+    'PIZZA', 'BURGER', 'PASTA', 'SALAD', 'SOUP', 'CAKE', 'COOKIE', 'RAINFOREST'
 ];
 
 let selectedWord = '';
@@ -202,7 +202,8 @@ function showHint() {
         'salad': 'A dish made of raw vegetables',
         'soup': 'A hot liquid dish with vegetables or meat',
         'cake': 'A sweet baked dessert made with flour and sugar',
-        'cookie': 'A small sweet baked treat'
+        'cookie': 'A small sweet baked treat',
+        'rainforest': 'A forest in a tropical area that receives a lot of rain'
     };
     
     console.log('Selected word:', selectedWord);
