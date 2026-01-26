@@ -188,5 +188,43 @@ function fallbackTTS(word, accent) {
     }
 }
 
-// Start the game when the page loads
-startGame();
+function showHint() {
+    const word = selectedWord.toLowerCase();
+    const hintContent = document.getElementById('hintContent');
+    
+    // Fetch definition from API
+    fetch(`https://api.dictionaryapi.dev/api/v2/entries/english/${word}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Definition not found');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const entry = data[0];
+            let hintHTML = '';
+            
+            // Get the first meaning with part of speech
+            if (entry.meanings && entry.meanings.length > 0) {
+                const meaning = entry.meanings[0];
+                const partOfSpeech = meaning.partOfSpeech || 'Unknown';
+                const definition = meaning.definitions && meaning.definitions.length > 0 
+                    ? meaning.definitions[0].definition 
+                    : 'Definition not available';
+                
+                hintHTML = `<div class="hint-box">
+                    <strong>Part of Speech:</strong> ${partOfSpeech}<br>
+                    <strong>Meaning:</strong> ${definition}
+                </div>`;
+            } else {
+                hintHTML = '<div class="hint-box">Definition not available for this word.</div>';
+            }
+            
+            hintContent.innerHTML = hintHTML;
+        })
+        .catch(error => {
+            console.error('Error fetching definition:', error);
+            hintContent.innerHTML = '<div class="hint-box">Could not fetch hint. Try another word!</div>';
+        });
+}
+
