@@ -131,48 +131,61 @@ function disableAllButtons() {
 function pronounceWord(accent = 'us') {
     const word = selectedWord.toLowerCase();
     
-    // Fetch pronunciation from Free Dictionary API
-    fetch(`https://api.dictionaryapi.dev/api/v2/entries/english/${word}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Word not found');
-            }
-            return response.json();
-        })
+    // Use Forvo API as primary source, fallback to text-to-speech
+    fetch(`https://apifree.forvo.com/action/word-pronunciations/format/json/word/${word}/language/en/`)
+        .then(response => response.json())
         .then(data => {
-            const phonetics = data[0].phonetics;
-            let audioUrl = '';
-            
-            // Find the audio for the selected accent
-            if (accent === 'us') {
-                // Look for US audio first
-                const usAudio = phonetics.find(p => p.text && p.text.includes('ˈ') && p.audio);
-                if (usAudio) {
-                    audioUrl = usAudio.audio;
-                } else {
-                    // Fallback to first available audio
-                    audioUrl = phonetics.find(p => p.audio)?.audio || '';
+            if (data.items && data.items.length > 0) {
+                let audioUrl = '';
+                
+                if (accent === 'us') {
+                    // Find US pronunciation
+                    const usAudio = data.items.find(item => item.country_id === '1' || item.country === 'America');
+                    audioUrl = usAudio ? usAudio.pathmp3 : data.items[0].pathmp3;
+                } else if (accent === 'uk') {
+                    // Find UK pronunciation
+                    const ukAudio = data.items.find(item => item.country_id === '13' || item.country === 'England');
+                    audioUrl = ukAudio ? ukAudio.pathmp3 : data.items[0].pathmp3;
                 }
-            } else if (accent === 'uk') {
-                // Look for UK audio - usually the last one or marked differently
-                const allAudios = phonetics.filter(p => p.audio);
-                audioUrl = allAudios.length > 1 ? allAudios[allAudios.length - 1].audio : (allAudios[0]?.audio || '');
-            }
-            
-            if (audioUrl) {
-                const audio = new Audio(audioUrl);
-                audio.play().catch(err => {
-                    console.error('Error playing audio:', err);
-                    alert('Could not play audio. Please try again!');
-                });
+                
+                if (audioUrl) {
+                    const audio = new Audio(audioUrl);
+                    audio.play().catch(err => {
+                        console.error('Error playing audio:', err);
+                        fallbackTTS(word, accent);
+                    });
+                } else {
+                    fallbackTTS(word, accent);
+                }
             } else {
-                alert(`Pronunciation not available for this word. Try another word!`);
+                fallbackTTS(word, accent);
             }
         })
         .catch(error => {
-            console.error('Error fetching pronunciation:', error);
-            alert('Could not fetch pronunciation. Check internet connection or try another word!');
+            console.error('Error fetching from Forvo:', error);
+            fallbackTTS(word, accent);
         });
+}
+
+function fallbackTTS(word, accent) {
+    // Fallback to browser's text-to-speech if API fails
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(word);
+        
+        // Set language based on accent
+        if (accent === 'us') {
+            utterance.lang = 'en-US';
+        } else if (accent === 'uk') {
+            utterance.lang = 'en-GB';
+        }
+        
+        utterance.rate = 0.8;
+        utterance.pitch = 1.0;
+        
+        speechSynthesis.speak(utterance);
+    } else {
+        alert('Pronunciation not available and speech synthesis not supported in your browser.');
+    }
 }
 
 // Start the game when the page loads
