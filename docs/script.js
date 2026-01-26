@@ -47,34 +47,17 @@ function createAlphabetButtons() {
 function guessLetter(letter) {
     if (gameOver) return;
     
-    const buttonElement = document.querySelector(`.letter-btn:nth-child(${letter.charCodeAt(0) - 64})`);
-    
-    // Check if button is already disabled (only for correctly guessed letters that won't repeat)
-    if (buttonElement.disabled) return;
-    
     // Check if this is the correct next letter in the sequence
     const correctLetter = selectedWord[nextLetterIndex];
     
     if (letter === correctLetter) {
         // Correct guess - it's the next letter in sequence
-        guessedLetters.push(letter);
-        buttonElement.classList.add('correct');
         nextLetterIndex++;
         updateWordDisplay();
         checkWin();
-        
-        // Only disable button if the next letter is NOT the same (no more repetitions needed)
-        if (nextLetterIndex < selectedWord.length && selectedWord[nextLetterIndex] === letter) {
-            // Keep enabled for next repetition
-            buttonElement.disabled = false;
-        } else {
-            // Disable since we've moved past this letter
-            buttonElement.disabled = true;
-        }
     } else {
-        // Wrong guess - keep button enabled so they can try again later
+        // Wrong guess
         wrongGuesses++;
-        buttonElement.classList.add('incorrect');
         drawHangmanPart();
         checkLose();
     }
