@@ -28,6 +28,7 @@ function startGame() {
     updateGameStatus();
     createAlphabetButtons();
     clearHangman();
+    document.getElementById('hintContent').innerHTML = '';  // Clear previous hint
 }
 
 function createAlphabetButtons() {
