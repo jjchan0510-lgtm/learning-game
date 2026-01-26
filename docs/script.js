@@ -11,6 +11,7 @@ let guessedLetters = [];
 let wrongGuesses = 0;
 let maxWrongGuesses = 6;
 let gameOver = false;
+let nextLetterIndex = 0;  // Track which letter in the sequence should be guessed next
 
 const hangmanParts = [
     'gallows', 'pole', 'beam', 'rope', 'head', 'body', 'left-arm', 'right-arm', 'left-leg', 'right-leg'
@@ -21,6 +22,7 @@ function startGame() {
     guessedLetters = [];
     wrongGuesses = 0;
     gameOver = false;
+    nextLetterIndex = 0;  // Reset to first letter
     
     updateWordDisplay();
     updateGameStatus();
@@ -44,15 +46,18 @@ function createAlphabetButtons() {
 
 function guessLetter(letter) {
     if (gameOver || guessedLetters.includes(letter)) return;
+    // Check if this is the correct next letter in the sequence
+    const correctLetter = selectedWord[nextLetterIndex];
     
-    guessedLetters.push(letter);
-    
-    if (selectedWord.includes(letter)) {
-        // Correct guess
+    if (letter === correctLetter) {
+        // Correct guess - it's the next letter in sequence
+        guessedLetters.push(letter);
         document.querySelector(`.letter-btn:nth-child(${letter.charCodeAt(0) - 64})`).classList.add('correct');
+        nextLetterIndex++;
         updateWordDisplay();
         checkWin();
     } else {
+        // Wrong guess - either wrong letter or not the next letter
         // Wrong guess
         wrongGuesses++;
         document.querySelector(`.letter-btn:nth-child(${letter.charCodeAt(0) - 64})`).classList.add('incorrect');
@@ -65,8 +70,8 @@ function guessLetter(letter) {
 }
 
 function updateWordDisplay() {
-    const display = selectedWord.split('').map(letter => 
-        guessedLetters.includes(letter) ? letter : '_'
+    const display = selectedWord.split('').map((letter, index) => 
+        index < nextLetterIndex ? letter : '_'
     ).join('');
     document.getElementById('wordDisplay').textContent = display;
 }
@@ -84,7 +89,8 @@ function updateGameStatus() {
             status.classList.add('win');
         }
     } else {
-        status.textContent = `Wrong guesses: ${wrongGuesses}/${maxWrongGuesses}`;
+        const nextLetter = selectedWord[nextLetterIndex];
+        status.textContent = `Next letter: "${nextLetter}" | Wrong guesses: ${wrongGuesses}/${maxWrongGuesses}`;
     }
 }
 
@@ -102,11 +108,8 @@ function clearHangman() {
 }
 
 function checkWin() {
-    const wordLetters = selectedWord.split('').filter(letter => letter !== ' ');
-    const uniqueLetters = [...new Set(wordLetters)];
-    const correctGuesses = guessedLetters.filter(letter => uniqueLetters.includes(letter));
-    
-    if (correctGuesses.length === uniqueLetters.length) {
+    // Win when all letters have been guessed in sequence
+    if (nextLetterIndex === selectedWord.length) {
         gameOver = true;
         updateGameStatus();
         disableAllButtons();
