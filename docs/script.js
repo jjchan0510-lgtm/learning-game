@@ -131,44 +131,7 @@ function disableAllButtons() {
 function pronounceWord(accent = 'us') {
     const word = selectedWord.toLowerCase();
     
-    // Use Forvo API as primary source, fallback to text-to-speech
-    fetch(`https://apifree.forvo.com/action/word-pronunciations/format/json/word/${word}/language/en/`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.items && data.items.length > 0) {
-                let audioUrl = '';
-                
-                if (accent === 'us') {
-                    // Find US pronunciation
-                    const usAudio = data.items.find(item => item.country_id === '1' || item.country === 'America');
-                    audioUrl = usAudio ? usAudio.pathmp3 : data.items[0].pathmp3;
-                } else if (accent === 'uk') {
-                    // Find UK pronunciation
-                    const ukAudio = data.items.find(item => item.country_id === '13' || item.country === 'England');
-                    audioUrl = ukAudio ? ukAudio.pathmp3 : data.items[0].pathmp3;
-                }
-                
-                if (audioUrl) {
-                    const audio = new Audio(audioUrl);
-                    audio.play().catch(err => {
-                        console.error('Error playing audio:', err);
-                        fallbackTTS(word, accent);
-                    });
-                } else {
-                    fallbackTTS(word, accent);
-                }
-            } else {
-                fallbackTTS(word, accent);
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching from Forvo:', error);
-            fallbackTTS(word, accent);
-        });
-}
-
-function fallbackTTS(word, accent) {
-    // Fallback to browser's text-to-speech if API fails
+    // Use browser's text-to-speech directly - most reliable
     if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(word);
         
@@ -181,10 +144,13 @@ function fallbackTTS(word, accent) {
         
         utterance.rate = 0.8;
         utterance.pitch = 1.0;
+        utterance.volume = 1.0;
         
+        // Cancel any previous speech
+        speechSynthesis.cancel();
         speechSynthesis.speak(utterance);
     } else {
-        alert('Pronunciation not available and speech synthesis not supported in your browser.');
+        alert('Speech synthesis is not supported in your browser.');
     }
 }
 
@@ -192,84 +158,53 @@ function showHint() {
     const word = selectedWord.toLowerCase();
     const hintContent = document.getElementById('hintContent');
     
-    // Try multiple sources for definition
-    // First try: DuckDuckGo API (reliable and free)
-    fetch(`https://api.duckduckgo.com/?q=${word}&format=json`)
-        .then(response => response.json())
-        .then(data => {
-            let hintHTML = '';
-            
-            if (data.AbstractText) {
-                // DuckDuckGo has a definition
-                hintHTML = `<div class="hint-box">
-                    <strong>Definition:</strong> ${data.AbstractText}
-                </div>`;
-            } else if (data.RelatedTopics && data.RelatedTopics.length > 0) {
-                // Try to extract definition from related topics
-                const firstTopic = data.RelatedTopics[0];
-                if (firstTopic.Text) {
-                    hintHTML = `<div class="hint-box">
-                        <strong>Definition:</strong> ${firstTopic.Text}
-                    </div>`;
-                } else {
-                    throw new Error('No definition found');
-                }
-            } else {
-                throw new Error('No definition found');
-            }
-            
-            hintContent.innerHTML = hintHTML;
-        })
-        .catch(error => {
-            console.error('Error fetching definition:', error);
-            // Fallback: use a simple hint based on common words
-            const hints = {
-                'apple': 'A round fruit that is red, green, or yellow',
-                'banana': 'A yellow fruit with soft flesh',
-                'orange': 'A round citrus fruit with orange color',
-                'grape': 'A small round fruit that grows in bunches',
-                'lemon': 'A yellow citrus fruit with sour taste',
-                'peach': 'A fuzzy round fruit with sweet flesh',
-                'cherry': 'A small red or dark fruit with a pit',
-                'melon': 'A large round fruit with soft flesh',
-                'house': 'A building where people live',
-                'school': 'A place where students learn',
-                'computer': 'An electronic device for processing information',
-                'window': 'An opening in a wall that lets in light',
-                'doctor': 'A person who treats sick people',
-                'teacher': 'A person who teaches students',
-                'student': 'A person who studies and learns',
-                'elephant': 'A large animal with a long trunk',
-                'giraffe': 'A tall animal with a long neck',
-                'tiger': 'A large striped wild cat',
-                'lion': 'A large wild cat with a mane',
-                'zebra': 'A striped animal similar to a horse',
-                'monkey': 'A small primate with a tail',
-                'bear': 'A large furry wild animal',
-                'ocean': 'A large body of salty water',
-                'mountain': 'A very high landform',
-                'forest': 'A large area covered with trees',
-                'desert': 'A dry sandy area with little water',
-                'river': 'A large flowing body of water',
-                'lake': 'A body of water surrounded by land',
-                'beach': 'A sandy area by the sea',
-                'pizza': 'An Italian baked dish with cheese and toppings',
-                'burger': 'A sandwich with a meat patty',
-                'pasta': 'Italian noodles made from wheat',
-                'salad': 'A dish of raw vegetables',
-                'soup': 'A liquid dish with vegetables or meat',
-                'cake': 'A sweet baked dessert',
-                'cookie': 'A small sweet baked treat'
-            };
-            
-            const hint = hints[word];
-            if (hint) {
-                hintContent.innerHTML = `<div class="hint-box">
-                    <strong>Definition:</strong> ${hint}
-                </div>`;
-            } else {
-                hintContent.innerHTML = '<div class="hint-box">Definition not available. Try another word!</div>';
-            }
-        });
+    // Built-in dictionary with all game words
+    const hints = {
+        'apple': 'A round fruit that is red, green, or yellow',
+        'banana': 'A yellow tropical fruit with soft flesh',
+        'orange': 'A round citrus fruit with orange color',
+        'grape': 'A small round fruit that grows in bunches',
+        'lemon': 'A yellow citrus fruit with very sour taste',
+        'peach': 'A fuzzy round fruit with sweet flesh',
+        'cherry': 'A small red or dark fruit with a pit',
+        'melon': 'A large round fruit with sweet watery flesh',
+        'house': 'A building where people live',
+        'school': 'A place where students learn from teachers',
+        'computer': 'An electronic device for processing information',
+        'window': 'An opening in a wall that lets in light and air',
+        'doctor': 'A person trained to treat sick people',
+        'teacher': 'A person who teaches students in school',
+        'student': 'A person who studies and learns at school',
+        'elephant': 'A very large animal with a long trunk and big ears',
+        'giraffe': 'A tall animal with a very long neck',
+        'tiger': 'A large striped wild cat with orange and black fur',
+        'lion': 'A large wild cat with a thick mane around the head',
+        'zebra': 'A striped animal similar to a horse',
+        'monkey': 'A small primate with a tail that swings on trees',
+        'bear': 'A large furry wild animal that eats fish and meat',
+        'ocean': 'A very large body of salty water',
+        'mountain': 'A very high landform with steep sides',
+        'forest': 'A large area covered with many trees',
+        'desert': 'A dry sandy area with very little water or plants',
+        'river': 'A large flowing body of water',
+        'lake': 'A body of water surrounded by land',
+        'beach': 'A sandy area by the sea or ocean',
+        'pizza': 'An Italian baked dish with cheese and toppings',
+        'burger': 'A sandwich with a meat patty between bread',
+        'pasta': 'Italian noodles made from wheat',
+        'salad': 'A dish made of raw vegetables',
+        'soup': 'A hot liquid dish with vegetables or meat',
+        'cake': 'A sweet baked dessert made with flour and sugar',
+        'cookie': 'A small sweet baked treat'
+    };
+    
+    const hint = hints[word];
+    if (hint) {
+        hintContent.innerHTML = `<div class="hint-box">
+            <strong>Hint:</strong> ${hint}
+        </div>`;
+    } else {
+        hintContent.innerHTML = '<div class="hint-box">No hint available for this word.</div>';
+    }
 }
 
