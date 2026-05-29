@@ -225,3 +225,61 @@ function showHint() {
 // Start the game when the page loads
 startGame();
 
+/* ---- Auth / Navigation helpers for login & signup pages ---- */
+
+function goToSignup() {
+    window.location.href = 'signup.html';
+}
+
+function goToLogin() {
+    window.location.href = 'login.html';
+}
+
+function isValidEmail(email) {
+    return /\S+@\S+\.\S+/.test(email);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const goSignupBtn = document.getElementById('goSignup');
+    if (goSignupBtn) goSignupBtn.addEventListener('click', goToSignup);
+
+    const goLoginBtn = document.getElementById('goLogin');
+    if (goLoginBtn) goLoginBtn.addEventListener('click', goToLogin);
+
+    const signupForm = document.getElementById('signupForm');
+    if (signupForm) {
+        signupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('signupName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const pass = document.getElementById('signupPassword').value;
+            const conf = document.getElementById('signupConfirm').value;
+
+            if (!name) return alert('Please enter your name');
+            if (!isValidEmail(email)) return alert('Please enter a valid email');
+            if (pass.length < 6) return alert('Password must be at least 6 characters');
+            if (pass !== conf) return alert('Passwords do not match');
+
+            // Demo: pretend to create account
+            alert('Account created (demo). You can now log in.');
+            window.location.href = 'login.html';
+        });
+    }
+
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPassword').value;
+
+            if (!isValidEmail(email)) return alert('Please enter a valid email');
+            if (!pass) return alert('Please enter your password');
+
+            // Demo: simple success
+            alert('Logged in (demo). Redirecting...');
+            window.location.href = 'index.html';
+        });
+    }
+});
+

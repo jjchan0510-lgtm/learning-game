@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <h1 class="title">Create Account</h1>
+        <form id="signupForm" class="auth-form">
+            <input id="signupName" class="auth-input" type="text" placeholder="Full name" required />
+            <input id="signupEmail" class="auth-input" type="email" placeholder="Email" required />
+            <input id="signupPassword" class="auth-input" type="password" placeholder="Password (min 6 chars)" required />
+            <input id="signupConfirm" class="auth-input" type="password" placeholder="Confirm password" required />
+
+            <div class="auth-actions">
+                <button type="submit" class="auth-btn">Sign Up</button>
+                <button type="button" id="goLogin" class="secondary-btn">Back to Login</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
