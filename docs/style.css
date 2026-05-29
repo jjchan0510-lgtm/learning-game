@@ -349,3 +349,46 @@ body {
 .secondary-btn:hover {
     background: rgba(102,126,234,0.06);
 }
+
+/* Split layout for auth pages */
+.auth-page {
+    display: flex;
+    gap: 0;
+    width: 100%;
+    max-width: 1000px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.auth-main {
+    flex: 1 1 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    background: white;
+}
+
+.auth-aside {
+    flex: 1 1 420px;
+    display: block;
+    min-height: 420px;
+    background: #f6f7fb;
+}
+
+.auth-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+@media (max-width: 820px) {
+    .auth-page {
+        flex-direction: column;
+    }
+
+    .auth-aside {
+        min-height: 200px;
+    }
+}

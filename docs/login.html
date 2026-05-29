@@ -7,17 +7,25 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="auth-container">
-        <h1 class="title">Welcome Back</h1>
-        <form id="loginForm" class="auth-form">
-            <input id="loginEmail" class="auth-input" type="email" placeholder="Email" required />
-            <input id="loginPassword" class="auth-input" type="password" placeholder="Password" required />
+    <div class="auth-page">
+        <div class="auth-main">
+            <div class="auth-container">
+                <h1 class="title">Welcome Back</h1>
+                <form id="loginForm" class="auth-form">
+                    <input id="loginEmail" class="auth-input" type="email" placeholder="Email" required />
+                    <input id="loginPassword" class="auth-input" type="password" placeholder="Password" required />
 
-            <div class="auth-actions">
-                <button type="submit" class="auth-btn">Log In</button>
-                <button type="button" id="goSignup" class="secondary-btn">Sign Up</button>
+                    <div class="auth-actions">
+                        <button type="submit" class="auth-btn">Log In</button>
+                        <button type="button" id="goSignup" class="secondary-btn">Sign Up</button>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
+
+        <aside class="auth-aside" aria-hidden="true">
+            <img class="auth-image" src="images/auth-photo.jpg" alt="Decorative signup illustration">
+        </aside>
     </div>
 
     <script src="script.js"></script>

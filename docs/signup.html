@@ -7,19 +7,27 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="auth-container">
-        <h1 class="title">Create Account</h1>
-        <form id="signupForm" class="auth-form">
-            <input id="signupName" class="auth-input" type="text" placeholder="Full name" required />
-            <input id="signupEmail" class="auth-input" type="email" placeholder="Email" required />
-            <input id="signupPassword" class="auth-input" type="password" placeholder="Password (min 6 chars)" required />
-            <input id="signupConfirm" class="auth-input" type="password" placeholder="Confirm password" required />
+    <div class="auth-page">
+        <div class="auth-main">
+            <div class="auth-container">
+                <h1 class="title">Create Account</h1>
+                <form id="signupForm" class="auth-form">
+                    <input id="signupName" class="auth-input" type="text" placeholder="Full name" required />
+                    <input id="signupEmail" class="auth-input" type="email" placeholder="Email" required />
+                    <input id="signupPassword" class="auth-input" type="password" placeholder="Password (min 6 chars)" required />
+                    <input id="signupConfirm" class="auth-input" type="password" placeholder="Confirm password" required />
 
-            <div class="auth-actions">
-                <button type="submit" class="auth-btn">Sign Up</button>
-                <button type="button" id="goLogin" class="secondary-btn">Back to Login</button>
+                    <div class="auth-actions">
+                        <button type="submit" class="auth-btn">Sign Up</button>
+                        <button type="button" id="goLogin" class="secondary-btn">Back to Login</button>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
+
+        <aside class="auth-aside" aria-hidden="true">
+            <img class="auth-image" src="images/auth-photo.jpg" alt="Decorative signup illustration">
+        </aside>
     </div>
 
     <script src="script.js"></script>
